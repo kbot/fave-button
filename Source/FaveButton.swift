@@ -62,6 +62,7 @@ open class FaveButton: UIButton {
     fileprivate(set) var sparkGroupCount: Int = 7
     
     fileprivate var faveIconImage:UIImage?
+    fileprivate var faveIconSelectedImage:UIImage?
     fileprivate var faveIcon: FaveIcon!
     
     
@@ -71,13 +72,14 @@ open class FaveButton: UIButton {
         }
     }
     
-    convenience public init(frame: CGRect, faveIconNormal: UIImage?) {
+    convenience public init(frame: CGRect, faveIconNormal: UIImage?, faveIconSelected: UIImage? = nil) {
         self.init(frame: frame)
         
         guard let icon = faveIconNormal else{
             fatalError("missing image for normal state")
         }
         faveIconImage = icon
+        faveIconSelectedImage = faveIconSelected ?? icon
         
         applyInit()
     }
@@ -98,28 +100,32 @@ extension FaveButton{
     fileprivate func applyInit(){
         
         if nil == faveIconImage{
-            faveIconImage = image(for: UIControlState())
+            faveIconImage = image(for: .normal)
+        }
+        if nil == faveIconSelectedImage {
+            faveIconSelectedImage = image(for: .selected)
+            if nil == faveIconSelectedImage {
+                faveIconSelectedImage = faveIconImage
+            }
         }
         
-        guard let faveIconImage = faveIconImage else{
+        guard let faveImage = faveIconImage,
+            let faveSelectedImage = faveIconSelectedImage else{
             fatalError("please provide an image for normal state.")
         }
         
-        setImage(UIImage(), for: UIControlState())
+        setImage(UIImage(), for: .normal)
         setImage(UIImage(), for: .selected)
-        setTitle(nil, for: UIControlState())
+        setTitle(nil, for: .normal)
         setTitle(nil, for: .selected)
-        
-        faveIcon  = createFaveIcon(faveIconImage)
+
+        if faveIcon != nil {
+            faveIcon.removeFromSuperview()
+        }
+        faveIcon  = FaveIcon.createFaveIcon(self, icon: faveImage, selectedIcon: faveSelectedImage, color: normalColor)
         
         addActions()
     }
-    
-    
-    fileprivate func createFaveIcon(_ faveIconImage: UIImage) -> FaveIcon{
-        return FaveIcon.createFaveIcon(self, icon: faveIconImage,color: normalColor)
-    }
-    
     
     fileprivate func createSparks(_ radius: CGFloat) -> [Spark] {
         var sparks    = [Spark]()
@@ -202,7 +208,6 @@ extension FaveButton{
         }
     }
 }
-
 
 
 

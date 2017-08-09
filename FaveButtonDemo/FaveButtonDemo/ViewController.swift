@@ -23,6 +23,7 @@ class ViewController: UIViewController, FaveButtonDelegate{
     
     @IBOutlet var heartButton: FaveButton?
     @IBOutlet var loveButton : FaveButton?
+    @IBOutlet var loveButtonContraint : NSLayoutConstraint?
     
     let colors = [
         DotColors(first: color(0x7DC2F4), second: color(0xE2264D)),
@@ -40,6 +41,15 @@ class ViewController: UIViewController, FaveButtonDelegate{
             return colors
         }
         return nil
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        loveButton?.backgroundColor = UIColor.red.withAlphaComponent(0.2)
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + 3) { 
+            self.loveButtonContraint?.constant = 65
+            self.view.layoutIfNeeded()
+        }
     }
 }
 

@@ -28,14 +28,16 @@ class FaveIcon: UIView {
     
     var iconColor: UIColor = .gray
     var iconImage: UIImage!
+    var selectedIconImage: UIImage!
     var iconLayer: CAShapeLayer!
     var iconMask:  CALayer!
     var contentRegion: CGRect!
     var tweenValues: [CGFloat]?
     
-    init(region: CGRect, icon: UIImage, color: UIColor) {
+    init(region: CGRect, icon: UIImage, selectedImage: UIImage, color: UIColor) {
         self.iconColor      = color
         self.iconImage      = icon
+        self.selectedIconImage = selectedImage
         self.contentRegion  = region
         super.init(frame: CGRect.zero)
         
@@ -45,14 +47,15 @@ class FaveIcon: UIView {
     required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+
 }
 
 
 // MARK: create
 extension FaveIcon{
     
-    class func createFaveIcon(_ onView: UIView, icon: UIImage, color: UIColor) -> FaveIcon{
-        let faveIcon = Init(FaveIcon(region:onView.bounds, icon: icon, color: color)){
+    class func createFaveIcon(_ onView: UIView, icon: UIImage, selectedIcon: UIImage, color: UIColor) -> FaveIcon{
+        let faveIcon = Init(FaveIcon(region:onView.bounds, icon: icon, selectedImage:selectedIcon, color: color)){
             $0.translatesAutoresizingMaskIntoConstraints = false
             $0.backgroundColor                           = .clear
         }
@@ -119,10 +122,19 @@ extension FaveIcon{
             $0.beginTime = CACurrentMediaTime()+selectedDelay
         }
         iconMask.add(scaleAnimation, forKey: nil)
+
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + duration * 0.15) {
+            if isSelected {
+                self.iconMask.contents = self.selectedIconImage.cgImage
+                self.iconLayer.mask = self.iconMask
+            }
+            else {
+                self.iconMask.contents = self.iconImage.cgImage
+                self.iconLayer.mask = self.iconMask
+            }
+        }
     }
-    
-    
-    
+
     func generateTweenValues(from: CGFloat, to: CGFloat, duration: CGFloat) -> [CGFloat]{
         var values         = [CGFloat]()
         let fps            = CGFloat(60.0)
